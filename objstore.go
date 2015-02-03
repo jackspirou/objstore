@@ -38,7 +38,7 @@ func main() {
 	app.Author = "Jack Spirou"
 	app.Email = "jack.spirou@me.com"
 
-	// Set CLI Flags.
+	// Define the CLI Flags.
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "rackspace",
@@ -66,6 +66,7 @@ func main() {
 		},
 	}
 
+	// Define the CLI Commands.
 	app.Commands = []cli.Command{
 		{
 			Name: "upload",
@@ -80,7 +81,7 @@ func main() {
 
 	// Its action time.
 	app.Action = func(c *cli.Context) {
-		println("upload! I say!")
+		println("No command supplied.")
 	}
 
 	// Run the CLI app with whatever args may come.
