@@ -6,7 +6,13 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-// USAGE
+// CURRENT USAGE
+//
+// objstorage -rackspace upload -r -v path/to/directory (this command would look for env variables to authenticate)
+// objstorage -rackspace -user="username" -key="api key" upload -r -v path/to/directory
+//
+
+// FUTURE USAGE
 //
 // objstorage [global options]      command [command options] [arguments...]
 //            -rackspace            upload    -r              /path/to/file.txt
@@ -18,11 +24,6 @@ import (
 //            -container="container name"
 //            -account="account number" or tenantID="tenant id"
 //            -identityendpoint="identity endpoint"
-//
-
-// objstorage -rackspace -r -v -user -pass -key -container /path/to/file.txt
-// objstorage -rackspace -user -pass -key -container /path/to/file.txt
-// objstorage -user -pass -key -container /path/to/file.txt
 //
 
 func main() {
