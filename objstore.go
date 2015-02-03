@@ -33,22 +33,48 @@ func main() {
 
 	// Set CLI Info.
 	app.Name = "osupload"
-	app.Usage = "A CLI tool for uploading files to OpenStack object storage."
+	app.Usage = "A CLI tool for uploading files to OpenStack object storage. Rackspace batteries included."
 	app.Version = "0.0.1"
 	app.Author = "Jack Spirou"
 	app.Email = "jack.spirou@me.com"
 
 	// Set CLI Flags.
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "config, c",
-			Value: "config.json",
-			Usage: "The path to the config file. Defaults to 'config.json' in the execution path.",
+		cli.BoolFlag{
+			Name:  "rackspace",
+			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
+		},
+		cli.BoolFlag{
+			Name:  "rackspace_us",
+			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
+		},
+		cli.BoolFlag{
+			Name:  "rackspace_uk",
+			Usage: "Rackspace Mode: Authenticate to UK Rackspace.",
 		},
 		cli.StringFlag{
-			Name:  "env, e",
-			Value: "dev",
+			Name:  "user",
+			Usage: "Authentication: The username used to authenticate.",
+		},
+		cli.StringFlag{
+			Name:  "pass",
+			Usage: "Authentication: The password used to authenticate.",
+		},
+		cli.StringFlag{
+			Name:  "key",
 			Usage: "The name of the environment to be used",
+		},
+	}
+
+	app.Commands = []cli.Command{
+		{
+			Name: "upload",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "r",
+					Usage: "Recursive Mode: Recursively traverse a directory.",
+				},
+			},
 		},
 	}
 
