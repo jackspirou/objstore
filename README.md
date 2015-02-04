@@ -1,2 +1,2 @@
-# osupload
-A command line interface for uploading files to Open Stack object storage (Rackspace Container Cloud Files)
+# objstore
+A CLI tool for uploading files to OpenStack object storage. Rackspace batteries included.
