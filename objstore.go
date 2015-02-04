@@ -99,6 +99,7 @@ func main() {
 				if err != nil {
 					log.Fatalln("Unable to authenticate: " + err.Error())
 				}
+				fmt.Println("Authenticated Successfully!")
 			},
 		},
 
