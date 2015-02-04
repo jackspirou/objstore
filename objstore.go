@@ -15,7 +15,7 @@ import (
 // FUTURE USAGE
 //
 // objstorage [global options]      command [command options] [arguments...]
-//            -rackspace            upload    -r              /path/to/file.txt
+// 						-rackspace            upload    -r              /path/to/file.txt
 //            -rackspace_us         update    -v              /path/to/directory
 //            -rackspace_uk         delete
 //            -user="username"      list
@@ -28,46 +28,79 @@ import (
 
 func main() {
 
-	// Create a new CLI app.
+	//
+	// CLI APP
+	//
 	app := cli.NewApp()
 
-	// Set CLI Info.
-	app.Name = "osupload"
+	//
+	// CLI APP INFO
+	//
+	app.Name = "objstorage"
 	app.Usage = "A CLI tool for uploading files to OpenStack object storage. Rackspace batteries included."
 	app.Version = "0.0.1"
 	app.Author = "Jack Spirou"
 	app.Email = "jack.spirou@me.com"
 
-	// Define the CLI Flags.
+	//
+	// GLOBAL FLAGS
+	//
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name:  "rackspace",
+			Name:  "rack, rackspace",
 			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
 		},
 		cli.BoolFlag{
-			Name:  "rackspace_us",
+			Name:  "rack_us, rackspace_us",
 			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
 		},
 		cli.BoolFlag{
-			Name:  "rackspace_uk",
+			Name:  "rack_uk, rackspace_uk",
 			Usage: "Rackspace Mode: Authenticate to UK Rackspace.",
 		},
 		cli.StringFlag{
-			Name:  "user",
-			Usage: "Authentication: The username used to authenticate.",
+			Name:  "u, user",
+			Usage: "Authentication: The username to authenticate.",
 		},
 		cli.StringFlag{
-			Name:  "pass",
-			Usage: "Authentication: The password used to authenticate.",
+			Name:  "p, pass",
+			Usage: "Authentication: The password to authenticate.",
 		},
 		cli.StringFlag{
-			Name:  "key",
-			Usage: "The name of the environment to be used",
+			Name:  "k, key",
+			Usage: "Authentication: The API key to authenticate.",
 		},
 	}
 
-	// Define the CLI Commands.
+	//
+	// COMMANDS
+	//
 	app.Commands = []cli.Command{
+
+		//
+		// Authenticate command
+		{
+			Name:        "authenticate",
+			ShortName:   "auth",
+			Usage:       "Authenticate to your OpenStack instance or Rackspace account.",
+			Description: "Use this command to test your credentials.",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "r",
+					Usage: "Recursive Mode: Recursively traverse a directory.",
+				},
+				cli.BoolFlag{
+					Name:  "v, verbose",
+					Usage: "Verboxe Mode: Show stuff as it happens.",
+				},
+			},
+			Action: func(c *cli.Context) {
+				println("Upload Stuff!")
+			},
+		},
+
+		//
+		// Upload command
 		{
 			Name: "upload",
 			Flags: []cli.Flag{
@@ -75,15 +108,26 @@ func main() {
 					Name:  "r",
 					Usage: "Recursive Mode: Recursively traverse a directory.",
 				},
+				cli.BoolFlag{
+					Name:  "v, verbose",
+					Usage: "Verboxe Mode: Show stuff as it happens.",
+				},
+			},
+			Action: func(c *cli.Context) {
+				println("Upload Stuff!")
 			},
 		},
 	}
 
-	// Its action time.
+	//
+	// DEFAULT ACTION
+	//
 	app.Action = func(c *cli.Context) {
-		println("No command supplied.")
+		cli.ShowAppHelp(c)
 	}
 
-	// Run the CLI app with whatever args may come.
+	//
+	// RUN APP
+	//
 	app.Run(os.Args)
 }
