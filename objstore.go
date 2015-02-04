@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/rackspace/gophercloud"
+	"github.com/rackspace/gophercloud/rackspace"
 )
 
 // CURRENT USAGE
@@ -47,15 +51,11 @@ func main() {
 	//
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name:  "rack, rackspace",
+			Name:  "rackspace, rack, rackspace_us, rack_us",
 			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
 		},
 		cli.BoolFlag{
-			Name:  "rack_us, rackspace_us",
-			Usage: "Rackspace Mode: Authenticate to US Rackspace.",
-		},
-		cli.BoolFlag{
-			Name:  "rack_uk, rackspace_uk",
+			Name:  "rackspace_uk, rack_uk",
 			Usage: "Rackspace Mode: Authenticate to UK Rackspace.",
 		},
 		cli.StringFlag{
@@ -78,29 +78,32 @@ func main() {
 	app.Commands = []cli.Command{
 
 		//
-		// Authenticate command
+		// Authenticate Command
 		{
 			Name:        "authenticate",
-			ShortName:   "auth",
 			Usage:       "Authenticate to your OpenStack instance or Rackspace account.",
+			ShortName:   "auth",
 			Description: "Use this command to test your credentials.",
 			Flags: []cli.Flag{
 				cli.BoolFlag{
-					Name:  "r",
-					Usage: "Recursive Mode: Recursively traverse a directory.",
+					Name:  "r, recursive",
+					Usage: "Recursive Mode: Upload files by recursively traversing a directory.",
 				},
 				cli.BoolFlag{
 					Name:  "v, verbose",
-					Usage: "Verboxe Mode: Show stuff as it happens.",
+					Usage: "Verbose Mode: Show stuff as it happens.",
 				},
 			},
 			Action: func(c *cli.Context) {
-				println("Upload Stuff!")
+				_, err := auth(c)
+				if err != nil {
+					log.Fatalln("Unable to authenticate: " + err.Error())
+				}
 			},
 		},
 
 		//
-		// Upload command
+		// Upload Command
 		{
 			Name: "upload",
 			Flags: []cli.Flag{
@@ -130,4 +133,89 @@ func main() {
 	// RUN APP
 	//
 	app.Run(os.Args)
+}
+
+//
+// auth take a cli context and authenticates a user to OpenStack or Rackspace.
+func auth(c *cli.Context) (*gophercloud.ProviderClient, error) {
+
+	// Get authentication flags.
+	user := c.GlobalString("user")
+	pass := c.GlobalString("pass")
+	key := c.GlobalString("key")
+
+	// It is only possible to connect to Rackspace US or UK, not both.
+	if c.GlobalBool("rackspace_us") && c.GlobalBool("rackspace_uk") {
+		log.Fatalln("It is only possible to connect to Rackspace US or UK, not both.")
+	}
+
+	// Authenticate to Rackspace.
+	if c.GlobalBool("rackspace_us") || c.GlobalBool("rackspace_uk") {
+
+		// Authenticate with Rackspace.
+		return authWithRackspace(c, user, pass, key)
+	}
+}
+
+//
+// authWithRackspace takes a cli context, user, pass, and key.
+// Then it authenticates with Rackspace.
+func authWithRackspace(c *cli.Context, user, pass, key string) (*gophercloud.ProviderClient, error) {
+
+	// We need authenication options, and an error.
+	var ao gophercloud.AuthOptions
+	var err error
+
+	// No valid user.
+	if len(user) == 0 {
+
+		// If the user wants verbosity give them verbosity...
+		if c.GlobalBool("verbose") {
+			fmt.Println("A user was not provided at the command line...")
+			fmt.Println("Searching enviorment variables for authentication options...")
+		}
+
+		// Search enviorment variables.
+		ao, err = rackspace.AuthOptionsFromEnv()
+
+		// Handle the error, as go programmers should...
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+	} else if len(pass) == 0 && len(key) == 0 { // No password or API key.
+
+		// If the user wants verbosity give them verbosity...
+		if c.GlobalBool("verbose") {
+			fmt.Println("A password or API key was not provided at the command line...")
+			fmt.Println("Searching enviorment variables for authentication options...")
+		}
+
+		// Search enviorment variables.
+		ao, err = rackspace.AuthOptionsFromEnv()
+
+		// Handle the error, as go programmers should...
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+	} else { // We have enough information from the command line to authenticate.
+
+		// Set available authentication options.
+		ao.Username = user
+		ao.Password = pass
+		ao.APIKey = key
+	}
+
+	// Set the Rackspace US URL endpoint.
+	if c.GlobalBool("rackspace_us") {
+		ao.IdentityEndpoint = rackspace.RackspaceUSIdentity
+	}
+
+	// Set the Rackspace UK URL endpoint.
+	if c.GlobalBool("rackspace_uk") {
+		ao.IdentityEndpoint = rackspace.RackspaceUKIdentity
+	}
+
+	return rackspace.AuthenticatedClient(ao)
 }
